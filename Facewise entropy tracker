@@ -1,0 +1,63 @@
+
+
+import matplotlib.pyplot as plt
+from magiccube import Cube
+from collections import Counter
+from math import log2
+
+
+def shannon_entropy(face_colors):
+    count = Counter(face_colors)
+    total = len(face_colors)
+    return -sum((c / total) * log2(c / total) for c in count.values())
+
+
+def calculate_entropy(cube):
+    k = cube.get_kociemba_facelet_colors()
+    ranges = [(0, 9), (9, 18), (18, 27), (27, 36), (36, 45), (45, 54)]
+    entropies = [shannon_entropy(list(k[s:e])) for s, e in ranges]
+    return sum(entropies) / len(entropies)
+
+
+def track_entropy(scramble, moves):
+    cube = Cube(3)
+    cube.rotate(scramble)
+    entropies = [calculate_entropy(cube)]
+    for mv in moves.split():
+        cube.rotate(mv)
+        entropies.append(calculate_entropy(cube))
+    return entropies
+
+
+def compute_increase_stats(entropies):
+    increase_count = 0
+    total_increase = 0.0
+    for prev, curr in zip(entropies, entropies[1:]):
+        if curr > prev:
+            increase_count += 1
+            total_increase += (curr - prev)
+    return increase_count, total_increase
+
+
+def plot_entropy(entropies):
+    plt.figure(figsize=(10, 5))
+    plt.plot(entropies, marker='o')
+    plt.xlabel("Move Step")
+    plt.ylabel("Shannon Entropy")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
+# Example usage
+if __name__ == "__main__":
+    scramble = "R U R' U'"
+    moves = "U R U' R'"
+    ent = track_entropy(scramble, moves)
+    inc_count, inc_total = compute_increase_stats(ent)
+    print("Increase count:", inc_count)
+    print("Total increase:", inc_total)
+    plot_entropy(ent)
+
+
+
