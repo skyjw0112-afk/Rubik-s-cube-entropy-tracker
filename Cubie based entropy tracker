@@ -1,7 +1,4 @@
 
-박세연
-PM 4:26 (11분 전)
-나에게
 
 from magiccube import Cube
 from math import log2
